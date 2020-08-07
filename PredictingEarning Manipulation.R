@@ -1,3 +1,7 @@
+#Jigyasa Sachdeva
+#Predicting Earning Manipulation of Coorporate Firms
+
+
 library(readxl)
 full_data <- read_excel("Desktop/Second\ Sem/Data\ Mining/Assignments/Assignment\ 5/IMB579-XLS-ENG_mscore.xlsx ")
 full_data <- IMB579_XLS_ENG_mscore
@@ -18,6 +22,7 @@ df_status(fulldata)
 #The proportion of non-manipulators in the target is 96.85%: Indicating unbalanced data
 
 summary(fulldata)
+
 
 
 
@@ -56,6 +61,7 @@ l1 <- fulldata[l,]
 
 
 
+
 #Bivariate Analysis for Correlation :
 
 fulldata_c <- subset(fulldata, select = -c(target)) 
@@ -68,9 +74,7 @@ corrplot(res, method="circle", type="upper", order = "hclust")
 cor(fulldata$DSRI, fulldata$SGAI)
 #0.470764
 
-
-
-#Question 1
+#Evaluating M-Score
 
 m_score <- (-4.84) + (0.92*fulldata$DSRI) + (0.528*fulldata$GMI) + (0.404*fulldata$AQI) + (0.892*fulldata$SGI) + (0.115*fulldata$DEPI) - (0.172*fulldata$SGAI) + (4.679*fulldata$ACCR) - (0.327*fulldata$LEVI)
 table(m_score> -2.22)
@@ -83,6 +87,11 @@ m[m_score<=-2.22] <- 0
 table(m)
 m <- as.factor(m)
 
+
+
+
+#Checking whether M-Score is a good predictor for identifying earning manipulations by an industry
+
 library(caret)
 confusionMatrix(m, fulldata$target,  positive= '1')
 #             Reference
@@ -93,8 +102,6 @@ confusionMatrix(m, fulldata$target,  positive= '1')
 
 
 
-#Questions 3
-
 library(readxl)
 sample_data <- read_excel("Desktop/IMB579-XLS-ENG.xlsx", sheet = "Sample for Model Development")
 View(sample_data)  
@@ -104,6 +111,7 @@ rm(sample_data)
 View(sampledata) 
 sampledata$`C-MANIPULATOR` <- as.factor(sampledata$`C-MANIPULATOR`)
 sampledata <- sampledata %>% rename(target = `C-MANIPULATOR` )
+
 
 
 
@@ -130,6 +138,8 @@ table(under$target)
 #25 26 
 
 
+
+
 #Step-Wise Logistic Regression
 full <- glm(target~., data= under, family= "binomial")
 null <- glm(target~1, data= under, family= "binomial")
@@ -141,8 +151,10 @@ Pred
 Class <- ifelse(Pred >= 0.5, '1', "0")
 Class <- as.factor(Class)
 
-
 confusionMatrix(Class, TestData$target, positive = '1')
+
+
+
 
 #Multiple sample:
 library(ROSE)
@@ -213,10 +225,6 @@ lapply(s, fun)
 
 
 
-
-
-
-
 #Youdan's Index
 
 s <- seq(from = 0, to= 1, by = 0.001)
@@ -247,7 +255,9 @@ confusionMatrix(Class, TestData$target, positive = '1')
 
 
 
-#Cost- based method
+
+
+#Cost- based function
 
 #False negative having more penalty than False Positive
 p1=7
@@ -279,6 +289,8 @@ confusionMatrix(Class, TestData$target, positive = '1')
 
 
 
+
+
 #Final Model  -> Cost based method
 
 full1 <- glm(target~., data= under1, family= "binomial")
@@ -290,6 +302,7 @@ Pred <- predict(stepf, newdata= TestData, type="response")
 Class <- ifelse(Pred >= 0.95, '1', "0")
 Class <- as.factor(Class)
 confusionMatrix(Class, TestData$target, positive = '1')
+
 
 
 
@@ -315,9 +328,7 @@ confusionMatrix(p, TestData$target, positive = '1')
 #         0 43  1
 #         1 23 12
 
-
 #Since decision tree is prone to variance, we cannot decide rules base on 1 sample
-
 
 library(ROSE)
 under1 <- ovun.sample(target~., data=TrainData,
@@ -341,9 +352,7 @@ confusionMatrix(p, TestData$target, positive = '1')
 #ACCR, DSRI are important
 
 
-
-
-#With unbalanced data
+#With unbalanced data:
 
 r2 <- rpart(target~., data= TrainData, control = rpart.control(minsplit =10, cp = 0.01))
 r2
@@ -356,6 +365,7 @@ confusionMatrix(p, TestData$target, positive = '1')
 #Prediction  0  1
 #         0 58  4
 #         1  8  9
+
 
 
 
@@ -419,9 +429,6 @@ confusionMatrix(Class, TestData$target, positive = '1')
 #Prediction   0   1
 #         0 374  10
 #         1   3   3
-
-
-
 
 full1 <- glm(target~., data= under1, family= "binomial")
 null1 <- glm(target~1, data= under1, family= "binomial")
